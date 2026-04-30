@@ -1,0 +1,28 @@
+# ── Secrets ──────────────────────────────
+.env
+
+# ── Python ───────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+
+# ── Dataset / large files ─────────────────
+# *.csv
+
+# ── OS ───────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDE ──────────────────────────────────
+.vscode/
+.idea/
+*.swp

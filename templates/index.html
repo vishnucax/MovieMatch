@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>🎬 MovieMatch — AI Movie Recommendations</title>
+  <meta name="description" content="Premium AI-powered movie recommendation platform built with Machine Learning."/>
+  
+  <!-- Cinematic SVG Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' },
+            accent: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }
+          },
+          boxShadow: {
+            'glass': '0 4px 24px -2px rgba(15, 23, 42, 0.05)',
+            'glass-hover': '0 12px 32px -4px rgba(15, 23, 42, 0.1)',
+            'glass-inset': 'inset 0 0 0 1px rgba(255, 255, 255, 0.6)',
+            'premium': '0 20px 40px -12px rgba(15, 23, 42, 0.08)',
+            'card-hover': '0 25px 50px -12px rgba(15, 23, 42, 0.15)',
+            'input': '0 2px 10px -1px rgba(15, 23, 42, 0.04)',
+            'input-focus': '0 0 0 4px rgba(59, 130, 246, 0.15), 0 8px 24px -4px rgba(15, 23, 42, 0.08)'
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both',
+            'shimmer': 'shimmer 2s infinite linear',
+            'blob': 'blob 12s infinite',
+            'modal-in': 'modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both',
+            'backdrop-in': 'fadeIn 0.3s ease-out both'
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(24px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            modalIn: {
+              '0%': { opacity: '0', transform: 'scale(0.95) translateY(20px)' },
+              '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-1200px 0' },
+              '100%': { backgroundPosition: '1200px 0' }
+            },
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(40px, -60px) scale(1.1)' },
+              '66%': { transform: 'translate(-30px, 30px) scale(0.95)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #fafbfc;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: -10;
+      background: radial-gradient(circle at 50% -20%, rgba(241, 245, 249, 1) 0%, rgba(250, 251, 252, 0) 70%);
+      overflow: hidden;
+    }
+    
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+    }
+    
+    .shimmer-bg {
+      background: linear-gradient(90deg, #f1f5f9 25%, #ffffff 50%, #f1f5f9 75%);
+      background-size: 1200px 100%;
+      animation: shimmer 2s infinite linear;
+    }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .text-gradient {
+      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .text-gradient-accent {
+      background: linear-gradient(135deg, #2563eb 0%, #475569 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Prevent body scroll when modal is open */
+    .modal-open { overflow: hidden; }
+  </style>
+</head>
+<body class="text-brand-900 min-h-screen flex flex-col selection:bg-accent-100 selection:text-accent-700 relative">
+
+  <!-- Background Blobs -->
+  <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-20 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] rounded-full bg-slate-100/50 mix-blend-multiply filter blur-[100px] animate-blob"></div>
+    <div class="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] rounded-full bg-blue-50/50 mix-blend-multiply filter blur-[100px] animate-blob" style="animation-delay: 3s;"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full z-40 transition-all duration-300" id="navbar">
+    <div class="absolute inset-0 glass-panel border-b-0 border-x-0 opacity-0 transition-opacity duration-300" id="navGlass"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="flex justify-between items-center h-16 md:h-20">
+        <div class="flex items-center gap-2 md:gap-3">
+          <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-brand-900 flex items-center justify-center shadow-md">
+            <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+            </svg>
+          </div>
+          <span class="font-extrabold text-brand-900 text-lg md:text-xl tracking-tight">MovieMatch</span>
+        </div>
+        <div class="flex items-center">
+          <a href="https://vishnucax.github.io" target="_blank" class="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full glass-panel hover:bg-white transition-all shadow-sm group">
+            <span class="text-xs md:text-sm font-semibold text-brand-600">Vishnu K</span>
+            <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-brand-400 group-hover:text-accent-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-grow pt-24 md:pt-32 pb-20 relative">
+    
+    <div class="hero-bg"></div>
+
+    <!-- Hero Section -->
+    <section class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-12 md:pb-20 text-center">
+      <div class="animate-fade-in-up">
+        
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 md:px-5 md:py-2 rounded-full glass-panel shadow-sm mb-8 md:mb-10 border border-brand-200/50">
+          <span class="flex h-2 w-2 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-accent-500"></span>
+          </span>
+          <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-brand-600">AI Recommendation Engine</span>
+        </div>
+        
+        <h1 class="text-4xl sm:text-6xl md:text-[5rem] font-black tracking-tighter mb-6 md:mb-8 max-w-5xl mx-auto leading-[1.1]">
+          Discover your next <br class="hidden sm:block"/>
+          <span class="text-gradient-accent">cinematic masterpiece</span>
+        </h1>
+        
+        <p class="mt-4 md:mt-6 text-lg sm:text-xl md:text-2xl text-brand-500 max-w-3xl mx-auto font-medium leading-relaxed px-4">
+          Experience the future of movie discovery. Enter a film you love, and our intelligent similarity engine will curate the perfect watchlist.
+        </p>
+      </div>
+
+      <!-- Search Component -->
+      <div class="mt-10 md:mt-14 max-w-3xl mx-auto relative z-30 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div id="searchContainer" class="relative glass-panel rounded-2xl md:rounded-full shadow-input transition-all duration-300 flex flex-col md:flex-row p-2 md:p-2.5 items-center bg-white/80">
+          <div class="hidden md:flex items-center px-4 text-brand-400">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            id="movieInput" 
+            autocomplete="off"
+            class="w-full bg-transparent border-none focus:ring-0 text-brand-900 text-lg md:text-xl placeholder-brand-400 py-4 md:py-0 px-4 md:px-2 outline-none font-semibold text-center md:text-left"
+            placeholder="Type a movie you love..."
+          />
+          <button 
+            id="searchBtn" 
+            onclick="getRecommendations()"
+            class="w-full md:w-auto mt-2 md:mt-0 bg-brand-900 hover:bg-brand-800 text-white font-bold text-base md:text-lg py-4 md:py-3.5 px-8 rounded-xl md:rounded-full transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98]"
+          >
+            <span>Analyze</span>
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Autocomplete Dropdown -->
+        <ul id="autocomplete" class="absolute top-full mt-3 w-full bg-white rounded-2xl shadow-premium overflow-hidden z-50 hidden no-scrollbar max-h-72 overflow-y-auto border border-brand-100 text-left">
+          <!-- Populated via JS -->
+        </ul>
+      </div>
+
+      <!-- Quick tags -->
+      <div class="mt-8 md:mt-10 flex flex-wrap justify-center gap-2 md:gap-3 px-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+        <span class="text-xs md:text-sm font-bold text-brand-400 uppercase tracking-widest mr-1 self-center hidden sm:block">Trending:</span>
+        <button onclick="setSearch('Inception')" class="px-4 py-1.5 md:px-5 md:py-2 rounded-full bg-white border border-brand-200 text-xs md:text-sm font-semibold text-brand-600 hover:text-brand-900 hover:border-brand-300 hover:shadow-sm transition-all">Inception</button>
+        <button onclick="setSearch('Interstellar')" class="px-4 py-1.5 md:px-5 md:py-2 rounded-full bg-white border border-brand-200 text-xs md:text-sm font-semibold text-brand-600 hover:text-brand-900 hover:border-brand-300 hover:shadow-sm transition-all">Interstellar</button>
+        <button onclick="setSearch('The Matrix')" class="px-4 py-1.5 md:px-5 md:py-2 rounded-full bg-white border border-brand-200 text-xs md:text-sm font-semibold text-brand-600 hover:text-brand-900 hover:border-brand-300 hover:shadow-sm transition-all">The Matrix</button>
+      </div>
+    </section>
+
+    <!-- Error/Feedback State -->
+    <div id="feedback" class="hidden max-w-3xl mx-auto px-4 mb-8">
+      <div id="feedbackInner" class="flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl p-4 shadow-sm">
+        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 md:w-5 md:h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <p id="feedbackMsg" class="text-sm md:text-base font-semibold text-red-800 leading-snug"></p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+      <div class="text-center mb-10 md:mb-16 flex flex-col items-center">
+        <div class="relative w-16 h-16 md:w-20 md:h-20 mb-5 md:mb-6">
+          <div class="absolute inset-0 rounded-full border-4 border-brand-100"></div>
+          <div class="absolute inset-0 rounded-full border-4 border-brand-800 border-t-transparent animate-spin"></div>
+        </div>
+        <h3 class="text-xl md:text-2xl font-bold text-brand-900 mb-2 tracking-tight">Processing Matrix...</h3>
+        <p class="text-brand-500 text-sm md:text-base font-medium">Analyzing metadata against 5,000+ films.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" id="skeletonGrid">
+        <!-- JS fills skeletons here -->
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <section id="results" class="hidden max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 scroll-mt-20 md:scroll-mt-28 relative z-20">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 mb-8 md:mb-12 border-b border-brand-200/60 pb-6 md:pb-8">
+        <div>
+          <div class="flex items-center gap-2.5 mb-2 md:mb-3">
+            <span class="flex h-2.5 w-2.5 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-500"></span>
+            </span>
+            <p class="text-xs md:text-sm font-bold tracking-widest text-brand-500 uppercase" id="resultsCount">0 Recommendations</p>
+          </div>
+          <h2 id="resultsTitle" class="text-3xl sm:text-4xl md:text-5xl font-black text-brand-900 tracking-tight leading-tight"></h2>
+        </div>
+        <div class="hidden md:flex items-center gap-2 text-sm font-semibold text-brand-600 bg-white border border-brand-200 px-4 py-2 rounded-xl shadow-sm">
+          <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Ranked by Cosine Similarity
+        </div>
+      </div>
+      
+      <div id="cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 md:gap-y-12">
+        <!-- Results injected here -->
+      </div>
+    </section>
+
+    <!-- Landing Content (Hides when results appear) -->
+    <div id="landingContent" class="animate-fade-in-up" style="animation-delay: 0.3s;">
+      
+      <!-- Features Section -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+          
+          <!-- Feature 1 -->
+          <div class="glass-card rounded-[2rem] p-8 md:p-10 shadow-glass hover:shadow-premium transition-all duration-300 group border border-white hover:-translate-y-1">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6 md:mb-8 group-hover:bg-brand-900 group-hover:border-brand-900 transition-colors duration-300">
+              <svg class="w-7 h-7 md:w-8 md:h-8 text-brand-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-brand-900 mb-3 md:mb-4">Instant Analysis</h3>
+            <p class="text-brand-500 text-sm md:text-base leading-relaxed font-medium">Process thousands of data points instantly. Our engine analyzes titles, overviews, cast, and crew in milliseconds.</p>
+          </div>
+          
+          <!-- Feature 2 -->
+          <div class="glass-card rounded-[2rem] p-8 md:p-10 shadow-glass hover:shadow-premium transition-all duration-300 group border border-white hover:-translate-y-1">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6 md:mb-8 group-hover:bg-brand-900 group-hover:border-brand-900 transition-colors duration-300">
+              <svg class="w-7 h-7 md:w-8 md:h-8 text-brand-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-brand-900 mb-3 md:mb-4">Precision Matching</h3>
+            <p class="text-brand-500 text-sm md:text-base leading-relaxed font-medium">Powered by TF-IDF vectorization and Cosine Similarity to find movies with genuine thematic resonance.</p>
+          </div>
+          
+          <!-- Feature 3 -->
+          <div class="glass-card rounded-[2rem] p-8 md:p-10 shadow-glass hover:shadow-premium transition-all duration-300 group border border-white hover:-translate-y-1">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-6 md:mb-8 group-hover:bg-brand-900 group-hover:border-brand-900 transition-colors duration-300">
+              <svg class="w-7 h-7 md:w-8 md:h-8 text-brand-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <h3 class="text-xl md:text-2xl font-bold text-brand-900 mb-3 md:mb-4">Live API Integration</h3>
+            <p class="text-brand-500 text-sm md:text-base leading-relaxed font-medium">Seamlessly connected to the TMDB API to fetch high-quality cinematic artwork automatically.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works (Landing Page) -->
+      <div id="howItWorksLanding">
+        <script>
+          const howItWorksHTML = `
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
+              <div class="bg-white rounded-[2rem] md:rounded-[3rem] p-8 sm:p-16 shadow-premium border border-brand-100 relative overflow-hidden">
+                <div class="text-center mb-12 md:mb-20 relative z-10">
+                  <h2 class="text-3xl md:text-5xl font-black text-brand-900 mb-4 md:mb-6 tracking-tight">The Engine Beneath</h2>
+                  <p class="text-lg md:text-xl text-brand-500 max-w-2xl mx-auto font-medium">A transparent look at our premium recommendation pipeline.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-12 relative z-10">
+                  <div class="relative group">
+                    <div class="hidden md:block absolute top-8 left-[60%] w-full h-px bg-brand-200"></div>
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                      <div class="w-16 h-16 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-900 font-black text-xl mb-6 shadow-sm">1</div>
+                      <h4 class="text-lg font-bold text-brand-900 mb-2">Input</h4>
+                      <p class="text-sm text-brand-500 font-medium">Provide a movie title. We use smart autocomplete to ensure exact matching.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="relative group">
+                    <div class="hidden md:block absolute top-8 left-[60%] w-full h-px bg-brand-200"></div>
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                      <div class="w-16 h-16 rounded-2xl bg-brand-900 shadow-lg flex items-center justify-center text-white font-black text-xl mb-6">2</div>
+                      <h4 class="text-lg font-bold text-brand-900 mb-2">Vectorization</h4>
+                      <p class="text-sm text-brand-500 font-medium">The movie's metadata is converted into a high-dimensional TF-IDF vector.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="relative group">
+                    <div class="hidden md:block absolute top-8 left-[60%] w-full h-px bg-brand-200"></div>
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                      <div class="w-16 h-16 rounded-2xl bg-brand-600 shadow-lg flex items-center justify-center text-white font-black text-xl mb-6">3</div>
+                      <h4 class="text-lg font-bold text-brand-900 mb-2">Similarity</h4>
+                      <p class="text-sm text-brand-500 font-medium">Cosine similarity compares your vector against 5,000+ films instantly.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="relative group">
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                      <div class="w-16 h-16 rounded-2xl bg-accent-600 shadow-lg flex items-center justify-center text-white font-black text-xl mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <h4 class="text-lg font-bold text-brand-900 mb-2">Results</h4>
+                      <p class="text-sm text-brand-500 font-medium">Top matches are retrieved and presented with cinematic TMDB posters.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          `;
+          document.write(howItWorksHTML);
+        </script>
+      </div>
+      
+    </div>
+    
+    <!-- How it works (Results Page) -->
+    <div id="howItWorksResults" class="hidden animate-fade-in-up">
+      <script>document.write(howItWorksHTML);</script>
+    </div>
+
+  </main>
+
+  <!-- Premium Footer -->
+  <footer class="bg-white border-t border-brand-200 mt-auto relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+        
+        <div class="flex flex-col items-center md:items-start gap-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-brand-900 flex items-center justify-center shadow-sm">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+              </svg>
+            </div>
+            <span class="font-bold text-brand-900 text-lg tracking-tight">MovieMatch</span>
+          </div>
+          <p class="text-brand-500 text-xs md:text-sm font-medium text-center md:text-left max-w-xs">
+            Professional AI-powered recommendations.
+          </p>
+        </div>
+        
+        <div class="flex flex-col items-center md:items-end gap-3">
+          <p class="text-sm text-brand-500 font-medium">
+            Designed & Built by <a href="https://vishnucax.github.io" target="_blank" class="text-brand-900 font-bold hover:text-accent-600 transition-colors">Vishnu K</a>
+          </p>
+          <div class="flex items-center gap-4">
+            <a href="https://github.com/vishnucax" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-900 transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            <a href="https://www.linkedin.com/in/vishnu-k-7-" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-blue-600 transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            <a href="https://vishnucax.github.io" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-accent-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </footer>
+
+  <!-- View Details Modal Overlay -->
+  <div id="movieModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center px-4 sm:px-6">
+    <div id="modalBackdrop" class="absolute inset-0 bg-brand-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+    
+    <div id="modalContent" class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] scale-95 opacity-0 transition-all duration-300">
+      
+      <!-- Close Button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 text-brand-900 md:text-white md:bg-black/20 md:hover:bg-black/40 flex items-center justify-center transition-colors backdrop-blur-md border border-white/20">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Modal Poster -->
+      <div class="w-full md:w-2/5 h-64 md:h-auto relative bg-brand-100 flex-shrink-0">
+        <div id="modalPosterPh" class="absolute inset-0 flex flex-col items-center justify-center text-brand-400 p-6 text-center">
+           <svg class="w-12 h-12 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+           </svg>
+           <span class="text-xs font-bold uppercase tracking-widest">No Poster Available</span>
+        </div>
+        <img id="modalPoster" src="" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" alt=""/>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden"></div>
+      </div>
+
+      <!-- Modal Info -->
+      <div class="w-full md:w-3/5 p-6 md:p-10 flex flex-col overflow-y-auto custom-scrollbar bg-white">
+        
+        <div class="flex items-center gap-2 mb-3">
+          <span id="modalMatch" class="px-3 py-1 rounded-full bg-accent-50 text-accent-700 text-xs font-bold border border-accent-100"></span>
+          <span id="modalYear" class="px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-bold border border-brand-100"></span>
+        </div>
+        
+        <h2 id="modalTitle" class="text-2xl md:text-4xl font-black text-brand-900 leading-tight mb-4 tracking-tight"></h2>
+        
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-700 border border-yellow-100">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            <span id="modalRating" class="text-sm font-black"></span>
+          </div>
+          <span id="modalGenres" class="text-xs font-bold text-brand-500 uppercase tracking-widest leading-relaxed"></span>
+        </div>
+        
+        <div class="w-12 h-1 bg-brand-200 rounded-full mb-6"></div>
+        
+        <h3 class="text-sm font-bold text-brand-900 uppercase tracking-widest mb-3">Overview</h3>
+        <p id="modalOverview" class="text-brand-600 text-sm md:text-base leading-relaxed font-medium mb-8"></p>
+        
+        <div class="mt-auto pt-6 border-t border-brand-100">
+          <button onclick="closeModal()" class="w-full md:w-auto px-8 py-3 rounded-xl bg-brand-900 hover:bg-brand-800 text-white font-bold transition-colors shadow-sm text-sm">
+            Close Details
+          </button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <style>
+    /* Custom Scrollbar for Modal */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 10px;
+    }
+  </style>
+
+  <script>
+    // State
+    let currentResults = [];
+    let acTimer = null;
+
+    // Elements
+    const searchWrap = document.getElementById('searchContainer');
+    const inputEl = document.getElementById('movieInput');
+    const acList = document.getElementById('autocomplete');
+    const feedbackEl = document.getElementById('feedback');
+    const feedbackMsg = document.getElementById('feedbackMsg');
+    const loadingEl = document.getElementById('loading');
+    const skeletonGrid = document.getElementById('skeletonGrid');
+    const resultsEl = document.getElementById('results');
+    const cardsEl = document.getElementById('cards');
+    const titleEl = document.getElementById('resultsTitle');
+    const countEl = document.getElementById('resultsCount');
+    const landingContent = document.getElementById('landingContent');
+    const howItWorksResults = document.getElementById('howItWorksResults');
+    
+    // Modal Elements
+    const modalEl = document.getElementById('movieModal');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalContent = document.getElementById('modalContent');
+
+    // Search focus effects
+    inputEl.addEventListener('focus', () => {
+      searchWrap.classList.add('shadow-input-focus');
+      searchWrap.classList.remove('bg-white/80');
+      searchWrap.classList.add('bg-white');
+    });
+    inputEl.addEventListener('blur', () => {
+      searchWrap.classList.remove('shadow-input-focus');
+      searchWrap.classList.add('bg-white/80');
+      searchWrap.classList.remove('bg-white');
+    });
+
+    // Helper for predefined tags
+    function setSearch(title) {
+      inputEl.value = title;
+      hideAC();
+      getRecommendations();
+    }
+
+    // Build Premium Skeletons
+    function buildSkeletons(n = 8) {
+      skeletonGrid.innerHTML = '';
+      for (let i = 0; i < n; i++) {
+        skeletonGrid.innerHTML += `
+          <div class="bg-white rounded-[1.5rem] overflow-hidden shadow-sm border border-brand-100 flex flex-col h-full">
+            <div class="shimmer-bg w-full aspect-[2/3]"></div>
+            <div class="p-5 md:p-6 flex-grow flex flex-col gap-4">
+              <div class="flex justify-between items-start gap-3">
+                <div class="shimmer-bg h-6 w-3/4 rounded-lg"></div>
+                <div class="shimmer-bg h-6 w-12 rounded-lg shrink-0"></div>
+              </div>
+              <div class="flex gap-2">
+                <div class="shimmer-bg h-5 w-16 rounded-md"></div>
+                <div class="shimmer-bg h-5 w-24 rounded-md"></div>
+              </div>
+              <div class="space-y-2.5 mt-auto pt-4">
+                <div class="shimmer-bg h-3 w-full rounded"></div>
+                <div class="shimmer-bg h-3 w-full rounded"></div>
+                <div class="shimmer-bg h-3 w-4/5 rounded"></div>
+              </div>
+            </div>
+          </div>`;
+      }
+    }
+
+    // Autocomplete Logic
+    inputEl.addEventListener('input', () => {
+      clearTimeout(acTimer);
+      const q = inputEl.value.trim();
+      if (q.length < 2) { hideAC(); return; }
+      
+      acTimer = setTimeout(async () => {
+        try {
+          const r = await fetch(`/search?q=${encodeURIComponent(q)}`);
+          const data = await r.json();
+          renderAC(data);
+        } catch { hideAC(); }
+      }, 250);
+    });
+
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { hideAC(); getRecommendations(); }
+      if (e.key === 'Escape') { hideAC(); inputEl.blur(); }
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#searchContainer') && !e.target.closest('#autocomplete')) {
+        hideAC();
+      }
+    });
+
+    function renderAC(titles) {
+      if (!titles || !titles.length) { hideAC(); return; }
+      acList.innerHTML = '';
+      
+      titles.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.className = 'px-5 py-3 md:py-4 text-brand-800 cursor-pointer border-b border-brand-50 last:border-0 hover:bg-brand-50 hover:text-accent-600 font-semibold transition-colors flex items-center gap-3 text-sm md:text-base';
+        
+        li.innerHTML = `
+          <div class="text-brand-300">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+            </svg>
+          </div>
+          <span class="truncate">${esc(t)}</span>
+        `;
+        
+        li.onclick = () => { inputEl.value = t; hideAC(); getRecommendations(); };
+        acList.appendChild(li);
+      });
+      acList.classList.remove('hidden');
+    }
+    
+    function hideAC() { acList.classList.add('hidden'); }
+
+    // Fetch Recommendations
+    async function getRecommendations() {
+      const title = inputEl.value.trim();
+      if (!title) { showError('Please enter a movie title to search.'); inputEl.focus(); return; }
+      
+      clearUI();
+      hide(landingContent);
+      hide(howItWorksResults);
+      buildSkeletons(8);
+      show(loadingEl);
+
+      try {
+        const res = await fetch('/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title })
+        });
+        const data = await res.json();
+        
+        // Fetch metadata concurrently for all results
+        const metadataPromises = data.recommendations.map(m => fetchMetadata(m.title));
+        const metadataArray = await Promise.all(metadataPromises);
+        
+        // Merge TMDB metadata into recommendations
+        data.recommendations = data.recommendations.map((m, i) => {
+          const tmdb = metadataArray[i];
+          if (tmdb) {
+            if (tmdb.release_date) m.year = tmdb.release_date.substring(0, 4);
+            if (tmdb.vote_average) m.rating = tmdb.vote_average.toFixed(1);
+            if (tmdb.overview) m.overview = tmdb.overview;
+            if (tmdb.genres && tmdb.genres.length > 0) m.genres = tmdb.genres.join(', ');
+            m.runtime = tmdb.runtime;
+            m.posterUrl = tmdb.poster_path ? `https://image.tmdb.org/t/p/w500${tmdb.poster_path}` : null;
+            m.backdropUrl = tmdb.backdrop_path ? `https://image.tmdb.org/t/p/w1280${tmdb.backdrop_path}` : null;
+          }
+          return m;
+        });
+
+        hide(loadingEl);
+        currentResults = data.recommendations;
+        renderResults(data);
+        show(howItWorksResults); // Show how it works below results
+      } catch {
+        hide(loadingEl);
+        showError('Could not connect to the recommendation engine.');
+        show(landingContent);
+      }
+    }
+
+    // Fetch TMDB Metadata
+    async function fetchMetadata(title) {
+      try {
+        const r = await fetch(`/metadata?title=${encodeURIComponent(title)}`);
+        const d = await r.json();
+        return d.error ? null : d;
+      } catch { return null; }
+    }
+
+    // Handle N/A Logic properly
+    function parseData(m) {
+      return {
+        ...m,
+        yearText: (!m.year || m.year === 'N/A') ? 'Unknown Year' : m.year,
+        ratingText: (!m.rating || m.rating === 'N/A' || m.rating === '0.0') ? 'Unrated' : m.rating,
+        genresText: (!m.genres || m.genres === 'N/A') ? 'Genre Unavailable' : m.genres,
+        overviewText: (!m.overview || m.overview === 'N/A') ? 'Metadata not available for this title.' : m.overview,
+        runtimeText: m.runtime ? `${m.runtime} min` : ''
+      };
+    }
+
+    // Render Cards
+    async function renderResults(data) {
+      titleEl.innerHTML = `Matches for <span class="text-brand-900 underline decoration-accent-400 decoration-4 underline-offset-4">${esc(data.query)}</span>`;
+      countEl.textContent = `${data.recommendations.length} Recommendations`;
+      cardsEl.innerHTML = '';
+      
+      show(resultsEl);
+      setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+
+      const cardEls = data.recommendations.map((rawMovie, i) => {
+        const m = parseData(rawMovie);
+        
+        const card = document.createElement('div');
+        // Mobile first stacking, polished card design
+        card.className = 'group flex flex-col bg-white rounded-[1.5rem] overflow-hidden shadow-sm border border-brand-100 hover:shadow-premium transition-all duration-300 hover:-translate-y-1.5';
+        card.style.animation = 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both';
+        card.style.animationDelay = `${i * 75}ms`;
+
+        const fillW = Math.round(m.similarity);
+        
+        card.innerHTML = `
+          <div class="relative w-full aspect-[2/3] bg-brand-50 overflow-hidden shrink-0">
+            <div id="poster-ph-${i}" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-brand-300 ${m.posterUrl ? 'hidden' : ''}">
+              <svg class="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="text-xs font-bold uppercase tracking-widest">${esc(m.title)}</span>
+            </div>
+            
+            ${m.posterUrl ? `<img id="poster-img-${i}" src="${m.posterUrl}" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-transform duration-700 group-hover:scale-105" onload="this.classList.remove('opacity-0')" alt="${esc(m.title)} poster"/>` : ''}
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <div class="absolute top-4 right-4 z-10">
+              <div class="px-3 py-1 rounded-full bg-white/95 shadow-sm text-xs font-black text-brand-900 flex items-center gap-1">
+                <svg class="w-3 h-3 text-accent-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                ${fillW}% Match
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-5 md:p-6 flex flex-col flex-grow bg-white">
+            <div class="flex justify-between items-start gap-3 mb-3">
+              <h3 class="font-bold text-lg md:text-xl text-brand-900 leading-tight group-hover:text-accent-600 transition-colors line-clamp-2">${esc(m.title)}</h3>
+              <span class="text-xs font-bold text-brand-500 bg-brand-50 border border-brand-100 px-2 py-1 rounded-md shrink-0 whitespace-nowrap">${esc(m.yearText)}</span>
+            </div>
+            
+            <div class="flex items-center gap-2 mb-4">
+              <div class="flex items-center gap-1 px-2 py-1 rounded text-xs font-bold ${m.ratingText === 'Unrated' ? 'bg-brand-50 text-brand-500' : 'bg-yellow-50 text-yellow-700'}">
+                <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                ${esc(m.ratingText)}
+              </div>
+              <span class="text-xs font-semibold text-brand-400 truncate">${esc(m.genresText)}</span>
+            </div>
+            
+            <p class="text-sm text-brand-600 leading-relaxed line-clamp-3 mb-6 flex-grow">${esc(m.overviewText)}</p>
+            
+            <button onclick="openModal(${i})" class="w-full mt-auto py-2.5 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-900 font-semibold text-sm transition-colors border border-brand-100">
+              View Details
+            </button>
+          </div>
+        `;
+        
+        cardsEl.appendChild(card);
+        return { card, m, i };
+      });
+    }
+
+    // Modal Logic
+    function openModal(index) {
+      const rawMovie = currentResults[index];
+      if (!rawMovie) return;
+      
+      const m = parseData(rawMovie);
+      
+      // Populate Modal
+      document.getElementById('modalTitle').textContent = m.title;
+      document.getElementById('modalYear').textContent = m.yearText;
+      document.getElementById('modalRating').textContent = m.ratingText;
+      
+      const genresEl = document.getElementById('modalGenres');
+      genresEl.textContent = m.genresText;
+      if(m.runtimeText) genresEl.textContent += ` • ${m.runtimeText}`;
+
+      document.getElementById('modalOverview').textContent = m.overviewText;
+      document.getElementById('modalMatch').textContent = `${Math.round(m.similarity)}% Match`;
+      
+      const posterImg = document.getElementById('modalPoster');
+      const posterPh = document.getElementById('modalPosterPh');
+      
+      if (m.posterUrl) {
+        // Prefer backdrop for modal if available, fallback to poster
+        const imgUrl = m.backdropUrl ? m.backdropUrl : m.posterUrl;
+        posterImg.src = imgUrl;
+        posterImg.classList.remove('opacity-0');
+        posterPh.classList.add('hidden');
+      } else {
+        posterImg.src = '';
+        posterImg.classList.add('opacity-0');
+        posterPh.classList.remove('hidden');
+      }
+
+      // Show Modal
+      document.body.classList.add('modal-open');
+      modalEl.classList.remove('hidden');
+      
+      // Animate In
+      requestAnimationFrame(() => {
+        modalBackdrop.classList.add('animate-backdrop-in');
+        modalContent.classList.add('animate-modal-in');
+        modalContent.classList.remove('opacity-0', 'scale-95');
+      });
+    }
+
+    function closeModal() {
+      // Animate Out
+      modalContent.classList.remove('animate-modal-in');
+      modalContent.classList.add('opacity-0', 'scale-95');
+      modalBackdrop.classList.remove('animate-backdrop-in');
+      
+      setTimeout(() => {
+        modalEl.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      }, 300);
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !modalEl.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    // UI Helpers
+    function clearUI() { 
+      hide(feedbackEl); 
+      hide(resultsEl); 
+      hide(loadingEl); 
+    }
+    
+    function show(el) { el.classList.remove('hidden'); }
+    function hide(el) { el.classList.add('hidden'); }
+
+    function showError(msg) {
+      feedbackMsg.textContent = msg;
+      show(feedbackEl);
+    }
+
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    
+    // Navbar effect on scroll
+    window.addEventListener('scroll', () => {
+      const navGlass = document.getElementById('navGlass');
+      if (window.scrollY > 10) {
+        navGlass.classList.remove('opacity-0');
+      } else {
+        navGlass.classList.add('opacity-0');
+      }
+    });
+  </script>
+</body>
+</html>
