@@ -89,24 +89,17 @@ class MovieRecommender:
         credits_df = None
 
         if movies_path:
-            raw_movies = pd.read_csv(movies_path)
+            # Optimize: load only necessary columns to save memory
             movie_cols = [
-                "id",
-                "movie_id",
-                "title",
-                "overview",
-                "genres",
-                "keywords",
-                "vote_average",
-                "vote_count",
-                "release_date",
+                "id", "movie_id", "title", "overview", "genres", 
+                "keywords", "vote_average", "vote_count", "release_date"
             ]
-            movies_df = raw_movies[[c for c in movie_cols if c in raw_movies.columns]].copy()
+            movies_df = pd.read_csv(movies_path, usecols=lambda c: c in movie_cols)
 
         if credits_path:
-            raw_credits = pd.read_csv(credits_path)
+            # Optimize: load only necessary columns
             credit_cols = ["movie_id", "title", "cast", "crew"]
-            credits_df = raw_credits[[c for c in credit_cols if c in raw_credits.columns]].copy()
+            credits_df = pd.read_csv(credits_path, usecols=lambda c: c in credit_cols)
 
         if movies_df is not None and credits_df is not None:
             if "movie_id" not in movies_df.columns and "id" in movies_df.columns:
@@ -139,22 +132,26 @@ class MovieRecommender:
 
         if "genres" in df.columns:
             df["genres_text"] = df["genres"].apply(_parse_json_column)
+            df.drop(columns=["genres"], inplace=True)
         else:
             df["genres_text"] = ""
 
         if "keywords" in df.columns:
             df["keywords_text"] = df["keywords"].apply(_parse_json_column)
+            df.drop(columns=["keywords"], inplace=True)
         else:
             df["keywords_text"] = ""
 
         if "cast" in df.columns:
             df["cast_text"] = df["cast"].apply(lambda val: _parse_name_list(val, limit=6))
+            df.drop(columns=["cast"], inplace=True)
         else:
             df["cast_text"] = ""
 
         if "crew" in df.columns:
             df["director_text"] = df["crew"].apply(_parse_director)
             df["crew_text"] = df["crew"].apply(lambda val: _parse_name_list(val, limit=8))
+            df.drop(columns=["crew"], inplace=True)
         else:
             df["director_text"] = ""
             df["crew_text"] = ""
@@ -192,7 +189,8 @@ class MovieRecommender:
         tfidf_matrix = tfidf.fit_transform(df["combined"])
 
         print("[4/4] Computing cosine similarity...")
-        self.cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+        # Optimize: use float32 to reduce matrix memory footprint by 50%
+        self.cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix).astype(np.float32)
         self.indices = pd.Series(df.index, index=df["title"].str.lower()).drop_duplicates()
 
         self.is_loaded = True
